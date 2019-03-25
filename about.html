@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-US">
+
+<head>
+    <link type="text/css" rel="stylesheet" href="./node_modules/material-design-icons/iconfont/material-icons.css" />
+    <link type="text/css" rel="stylesheet" href="./node_modules/materialize-css/dist/css/materialize.min.css" media="screen,projection" />
+    <style>
+        #version {
+            color: darkgray;
+            font-size: 18px;
+            margin-top: 0;
+        }
+        textarea {
+            margin-top: 10px;
+            border:solid 1px darkgray;
+            border-radius: 8px;
+            height: 80px;
+            overflow-y: auto;
+            resize: none;
+        }
+    </style>
+    <title>关于</title>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row" style="margin-top: 20px; margin-bottom: 0;">
+            <div class="col s6 offset-s3">
+                <img src="./img/icon.png" style="width: 100%; height: 100%;">
+            </div>
+        </div>
+        <div class="row" style="margin-top: 0; margin-bottom: 0;">
+            <div class="col s8 offset-s2">
+                <img src="./img/xGBCX.png" style="width: 100%; height: 100%;">
+            </div>
+        </div>
+        <p id="version" class="center"></p>
+        <ul class="collapsible">
+            <li class="active">
+                <div class="collapsible-header"><b>About</b></div>
+                <div class="collapsible-body"><span>xGBCX is a GameBoy Color emulator created by <a href="https://github.com/JeziL">JeziL</a>.</span></div>
+            </li>
+            <li>
+                <div class="collapsible-header"><b>GameBoy-Online</b></div>
+                <div class="collapsible-body">
+                    <span>xGBCX is developed based on <a href="https://github.com/taisel/GameBoy-Online">GameBoy-Online</a>, a great JavaScript GameBoy Color emulator created by <a href="https://github.com/taisel">taisel</a>. Here comes its license:</span>
+                    <textarea readonly="readonly">
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+                            
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+                    </textarea>
+                </div>
+            </li>
+            <li>
+                <div class="collapsible-header"><b>xGBC</b></div>
+                <div class="collapsible-body"><span>xGBCX is inspired by <a href="https://github.com/cyanzhong/xTeko/tree/master/extension-scripts/xgbc">xGBC</a>, a script running in iOS App <a href="https://itunes.apple.com/app/id1312014438">JSBox</a>. xGBX and JSBox are both created by <a href="https://github.com/cyanzhong">cyanzhong</a>.</span></div>
+            </li>
+            <li>
+                <div class="collapsible-header"><b>Other Credits</b></div>
+                <div class="collapsible-body">
+                    <div class="collection" style="margin-bottom: 10px;">
+                        <a href="https://electronjs.org/" class="collection-item">Electron</a>
+                        <a href="https://materializecss.com/" class="collection-item">Materialize</a>
+                        <a href="https://momentjs.com/" class="collection-item">Moment.js</a>
+                        <a href="https://github.com/substack/node-mkdirp" class="collection-item">mkdirp</a>
+                        <a href="https://github.com/isaacs/rimraf" class="collection-item">rimraf</a>
+                    </div>
+                    <span>The icon made by <a href="https://www.freepik.com/" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a>.</span>
+                </div>
+            </li>
+        </ul>
+    </div>
+    <script>
+        const { ipcRenderer, shell } = require('electron')
+
+        document.addEventListener('click', function (event) {
+            if (event.target.tagName === 'A' && event.target.href.startsWith('http')) {
+                event.preventDefault()
+                shell.openExternal(event.target.href)
+            }
+        })
+
+        document.addEventListener("DOMContentLoaded", () => {
+            var elems = document.querySelectorAll(".collapsible")
+            var instances = M.Collapsible.init(elems)
+        })
+        
+        ipcRenderer.on("version", (event, version) => {
+            document.getElementById("version").innerHTML = `v${version}`
+        })
+
+        window.addEventListener("keyup", e => {
+            if (e.key === "Escape") {
+                window.close()
+            }
+        })
+    </script>
+    <script type="text/javascript" src="./node_modules/materialize-css/dist/js/materialize.min.js"></script>
+</body>
+
+</html>

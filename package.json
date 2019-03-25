@@ -1,0 +1,39 @@
+{
+  "name": "xgbcx",
+  "version": "0.9.1",
+  "description": "A GameBoy Color Emulator.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
+  },
+  "author": "JeziL",
+  "license": "MIT",
+  "build": {
+    "appId": "com.wangjinli.xgbcx",
+    "productName": "xGBCX",
+    "mac": {
+      "category": "public.app-category.games"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": true,
+      "allowToChangeInstallationDirectory": true
+    }
+  },
+  "devDependencies": {
+    "electron": "^4.0.7",
+    "electron-builder": "^20.38.5"
+  },
+  "dependencies": {
+    "material-design-icons": "^3.0.1",
+    "materialize-css": "^1.0.0-rc.2",
+    "mkdirp": "^0.5.1",
+    "moment": "^2.24.0",
+    "rimraf": "^2.6.3"
+  }
+}

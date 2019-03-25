@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-US">
+
+<head>
+    <link type="text/css" rel="stylesheet" href="./node_modules/material-design-icons/iconfont/material-icons.css" />
+    <link type="text/css" rel="stylesheet" href="./node_modules/materialize-css/dist/css/materialize.min.css" media="screen,projection" />
+    <style>
+        body {
+            font-family: "Arial", "Microsoft YaHei", "黑体", "宋体", sans-serif;
+            display: flex;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+
+        main {
+            flex: 1 0 auto;
+        }
+
+        .rom-title {
+            font-size: 20px !important;
+            margin-left: 10px;
+        }
+    </style>
+    <title>存档</title>
+</head>
+
+<body>
+    <header>
+        <nav class="cyan z-depth-3">
+            <div class="nav-wrapper">
+                <span class="brand-logo rom-title left"></span>
+                <ul id="nav-btns" class="right">
+                    <li><a href="#" id="openDirBtn"><i class="material-icons">folder_open</i></a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+    <main>
+        <div class="container">
+            <div class="row saveRow" style="margin-top: 20px;"></div>
+        </div>
+    </main>
+
+    <script>
+        const { ipcRenderer } = require('electron')
+        const app = require('electron').remote
+
+        var gRom
+
+        ipcRenderer.on("savesList", (event, data) => {
+            gRom = data.rom
+            document.getElementsByClassName("rom-title")[0].innerHTML = gRom.title
+            data.saves.forEach(save => {
+                let card = `<div class="col s4">\
+                                <div class="card" data-title="${save.title}">\
+                                    <div class="card-image">
+                                        <img src="${save.img}">
+                                    </div>
+                                    <div class="card-content" style="font-size: 18px; padding: 10px;">${save.title}</div>
+                                    <div class="card-action">
+                                        <a href="#" class="cyan-text loadBtn" data-url="${save.data}">加载</a>
+                                        <a href="#" class="red-text deleteBtn" data-dir="${save.path}">删除</a>
+                                    </div>
+                                </div>
+                            </div>`
+                let rows = document.getElementsByClassName("saveRow")
+                if (rows[rows.length - 1].children.length >= 3) {
+                    document.getElementsByClassName("container")[0].insertAdjacentHTML("beforeend", "<div class=\"row saveRow\" style=\"margin-top: 20px;\"></div>")
+                }
+                rows[rows.length - 1].insertAdjacentHTML("beforeend", card)
+            })
+            Array.from(document.getElementsByClassName("loadBtn")).forEach(e => {
+                e.addEventListener("click", e => {
+                    ipcRenderer.send("loadState", e.target.getAttribute("data-url"))
+                })
+            })
+            Array.from(document.getElementsByClassName("deleteBtn")).forEach(e => {
+                e.addEventListener("click", e => {
+                    ipcRenderer.send("deleteState", e.target.getAttribute("data-dir"))
+                })
+            })
+        })
+
+        ipcRenderer.on("stateDeleted", (event, title) => {
+            var card = document.querySelector(`.card[data-title="${title}"]`)
+            card.parentNode.removeChild(card)
+        })
+
+        document.getElementById("openDirBtn").onclick = () => {
+            ipcRenderer.send("openSaveDir", gRom)
+        }
+
+        window.addEventListener("keyup", e => {
+            if (e.key === "Escape") {
+                ipcRenderer.send("loadState", null)
+            } else if (e.key === "Enter") {
+                let loadBtns = document.getElementsByClassName("loadBtn")
+                if (loadBtns.length > 0) {
+                    ipcRenderer.send("loadState", loadBtns[0].getAttribute("data-url"))
+                }
+            }
+        })
+    </script>
+    <script type="text/javascript" src="./node_modules/materialize-css/dist/js/materialize.min.js"></script>
+</body>
+
+</html>

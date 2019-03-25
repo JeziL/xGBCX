@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-US">
+
+<head>
+    <link type="text/css" rel="stylesheet" href="./node_modules/material-design-icons/iconfont/material-icons.css" />
+    <link type="text/css" rel="stylesheet" href="./node_modules/materialize-css/dist/css/materialize.min.css" media="screen,projection" />
+
+    <title>设置</title>
+</head>
+
+<body>
+    <div class="container">
+        <p style="font-size: 18px;">键位设置</p>
+        <div class="row">
+            <div class="col s6">
+                <ul class="collection with-header">
+                    <li class="collection-header"><b>游戏</b></a>
+                    <a href="#!" class="collection-item keymap" settings-key="keymap.game.up">上<span class="badge"></span></a>
+                    <a href="#!" class="collection-item keymap" settings-key="keymap.game.down">下<span class="badge"></span></a>
+                    <a href="#!" class="collection-item keymap" settings-key="keymap.game.left">左<span class="badge"></span></a>
+                    <a href="#!" class="collection-item keymap" settings-key="keymap.game.right">右<span class="badge"></span></a>
+                    <a href="#!" class="collection-item keymap" settings-key="keymap.game.b">B<span class="badge"></span></a>
+                    <a href="#!" class="collection-item keymap" settings-key="keymap.game.a">A<span class="badge"></span></a>
+                    <a href="#!" class="collection-item keymap" settings-key="keymap.game.select">select<span class="badge"></span></a>
+                    <a href="#!" class="collection-item keymap" settings-key="keymap.game.start">start<span class="badge"></span></a>
+                </ul>
+            </div>
+            <div class="col s6">
+                <ul class="collection with-header">
+                    <li class="collection-header"><b>系统</b></a>
+                    <a href="#!" class="collection-item keymap" settings-key="keymap.system.save">存档<span class="badge"></span></a>
+                    <a href="#!" class="collection-item keymap" settings-key="keymap.system.load">读档<span class="badge"></span></a>
+                    <a href="#!" class="collection-item keymap" settings-key="keymap.system.capture">截图<span class="badge"></span></a>
+                </ul>
+            </div>
+        </div>
+        <a class="waves-effect waves-light btn right col s3 grey" id="cancelBtn" onclick="window.close()">取消</a>
+        <a class="waves-effect waves-light btn right col s3 cyan" id="saveBtn"style="margin-right: 16px;">确定</a>
+    </div>
+    <script>
+        const { ipcRenderer } = require('electron')
+
+        let onSet = false
+        var gSettings = new Object
+
+        ipcRenderer.on("settings", (event, settings) => {
+            Array.from(document.getElementsByClassName("keymap")).forEach(e => {
+                let value = e.getAttribute("settings-key").split('.').reduce((o,i)=>o[i], settings)
+                e.childNodes[1].innerHTML = value
+                e.addEventListener("click", e => {
+                    if (onSet) return
+                    onSet = true
+                    keymapSet(e)
+                })
+            })
+        })
+
+        function keymapSet (e) {
+            e.currentTarget.classList.add("active")
+            e.currentTarget.childNodes[1].classList.add("white-text")
+            e.currentTarget.addEventListener("keyup", onKeyUp)
+        }
+
+        function onKeyUp (e) {
+            e.currentTarget.childNodes[1].innerHTML = e.key
+            e.currentTarget.removeEventListener("keyup", onKeyUp)
+            e.currentTarget.classList.remove("active")
+            e.currentTarget.childNodes[1].classList.remove("white-text")
+            onSet = false
+        }
+
+        function setKey (key, value, targetObject) {
+            var keys = key.split("."), obj = targetObject || window, keyPart
+            while ((keyPart = keys.shift()) && keys.length) {
+                if (!obj[keyPart]) {
+                    obj[keyPart] = new Object
+                }   
+                obj = obj[keyPart]
+            }
+            obj[keyPart] = value
+        }
+
+        document.getElementById("saveBtn").onclick = () => {
+            Array.from(document.getElementsByClassName("keymap")).forEach(e => {
+                let key = e.getAttribute("settings-key")
+                let value = e.childNodes[1].innerHTML
+                setKey(key, value, gSettings)
+            })
+            ipcRenderer.send("saveSettings", gSettings)
+            window.close()
+        }
+    </script>
+    <script type="text/javascript" src="./node_modules/materialize-css/dist/js/materialize.min.js"></script>
+</body>
+
+</html>
