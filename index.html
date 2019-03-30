@@ -275,6 +275,9 @@
 
         var gRom
         var gSettings
+        var gpID
+        var scanner
+        var captureInProgress = false
 
         ipcRenderer.on("loadSettings", (event, settings) => {
             gSettings = settings
@@ -368,6 +371,66 @@
             event.preventDefault()
             ipcRenderer.send("romDropped", event.dataTransfer.files[0].path)
         }
+
+        window.addEventListener("gamepadconnected", e => {
+            if (e.gamepad.id.includes("Vendor: 057e Product: 2009")) {
+                M.toast({html: "Pro 手柄已连接"})
+                gpID = e.gamepad.index
+            }
+            scanner = setInterval(proControllerScan, 33)
+        })
+
+        window.addEventListener("gamepaddisconnected", e => {
+            if (e.gamepad.id.includes("Vendor: 057e Product: 2009")) {
+                M.toast({html: "Pro 手柄已断开"})
+                gpID = null
+            }
+            clearInterval(scanner)
+        })
+
+        function proControllerScan() {
+            let gamepad = navigator.getGamepads()[gpID]
+            let keymap = {
+                game: {
+                    "a":        1,
+                    "b":        0,
+                    "select":   6,
+                    "start":    7
+                },
+                system: {
+                    "save":     8,
+                    "load":     9,
+                    "capture":  13
+                }
+            }
+            for (var k in keymap.game) {
+                var btn = gamepad.buttons[keymap.game[k]]
+                if (btn.pressed) {
+                    GameBoyKeyDown(k)
+                } else {
+                    GameBoyKeyUp(k)
+                }
+            }
+            let deg = (gamepad.axes[9] + 1) * 157.5
+            axesDegree2Buttons(deg)
+            if (gamepad.buttons[keymap.system["save"]].pressed) {
+                onSaveState()
+            }
+            if (gamepad.buttons[keymap.system["load"]].pressed) {
+                ipcRenderer.send("listSaves", gRom)
+            }
+            if (gamepad.buttons[keymap.system["capture"]].pressed) {
+                if (!captureInProgress) {
+                    captureInProgress = true
+                    let image = document.getElementById("mainCanvas").toDataURL("image/jpeg", 0.8)
+                    ipcRenderer.send("saveCapture", image)
+                }
+            }
+        }
+
+        ipcRenderer.on("captureSavedOrCancelled", event => {
+            captureInProgress = false
+        })
     </script>
     <script type="text/javascript" src="./node_modules/materialize-css/dist/js/materialize.min.js"></script>
 </body>

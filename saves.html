@@ -47,6 +47,8 @@
         const app = require('electron').remote
 
         var gRom
+        var gpID
+        var scanner
 
         ipcRenderer.on("savesList", (event, data) => {
             gRom = data.rom
@@ -91,16 +93,44 @@
             ipcRenderer.send("openSaveDir", gRom)
         }
 
+        function loadLatest() {
+            let loadBtns = document.getElementsByClassName("loadBtn")
+            if (loadBtns.length > 0) {
+                ipcRenderer.send("loadState", loadBtns[0].getAttribute("data-url"))
+            }
+        }
+
         window.addEventListener("keyup", e => {
             if (e.key === "Escape") {
                 ipcRenderer.send("loadState", null)
             } else if (e.key === "Enter") {
-                let loadBtns = document.getElementsByClassName("loadBtn")
-                if (loadBtns.length > 0) {
-                    ipcRenderer.send("loadState", loadBtns[0].getAttribute("data-url"))
-                }
+                loadLatest()
             }
         })
+
+        window.addEventListener("gamepadconnected", e => {
+            if (e.gamepad.id.includes("Vendor: 057e Product: 2009")) {
+                gpID = e.gamepad.index
+            }
+            scanner = setInterval(proControllerScan, 33)
+        })
+
+        window.addEventListener("gamepaddisconnected", e => {
+            if (e.gamepad.id.includes("Vendor: 057e Product: 2009")) {
+                gpID = null
+            }
+            clearInterval(scanner)
+        })
+
+        function proControllerScan() {
+            let gamepad = navigator.getGamepads()[gpID]
+            if (gamepad.buttons[0].pressed) {
+                ipcRenderer.send("loadState", null)
+            }
+            if (gamepad.buttons[1].pressed) {
+                loadLatest()
+            }
+        }
     </script>
     <script type="text/javascript" src="./node_modules/materialize-css/dist/js/materialize.min.js"></script>
 </body>

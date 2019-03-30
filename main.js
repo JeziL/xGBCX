@@ -203,8 +203,10 @@ ipcMain.on("saveCapture", (event, imageData) => {
     if (filename) {
       fs.writeFile(filename, imageData.split(',')[1], "base64", err => {
         if (err) throw err
+        event.sender.send("captureSavedOrCancelled")
       })
     }
+    event.sender.send("captureSavedOrCancelled")
   })
 })
 
